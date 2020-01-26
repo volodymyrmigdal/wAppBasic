@@ -1,46 +1,25 @@
-# # Test against the latest version of this Node.js version
-# image: 
-#   - macos-mojave
-#   - Ubuntu
-#   - Visual Studio 2017
-  
+# Test against the latest version of this Node.js version
+os: Visual Studio 2019
 
-# environment:
-#   matrix:
-#     - nodejs_version: "12"
-#     - nodejs_version: "10"
-#     - nodejs_version: "9"
-#     - nodejs_version: "8"
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
-# # Install scripts. (runs after repo cloning)
-# install:
-#   # Get the latest stable version of Node.js or io.js
-#   - sh: nvm install $nodejs_version
-#   # install modules
-#   - npm install
-
-# # Post-install test scripts.
-# test_script:
-#   # Output useful info for debugging.
-#   - node --version
-#   - npm --version
-#   - npm test
-
-# # Don't actually build.
-# build: off
-
-build_cloud: docker
+platform: x64
 
 environment:
-  matrix:
+  nodejs_version: "12"
 
-  - job_name: Node.js 12 tests
-    docker_image: appveyor/build-image:minimal-windowsservercore-ltsc2019
+# Install scripts. (runs after repo cloning)
+install:
+  - ps: Install-Product node $env:nodejs_version
+  - npm install
 
-for:
--
-  matrix:
-    only:
-      - job_name: Node.js 12 tests
-  test_script:
+# Post-install test scripts.
+test_script:
+  # Output useful info for debugging.
   - node --version
+  - npm --version
+  - "node sample/interruptSignalChild/Windows-kill.js"
+
+# Don't actually build.
+build: off
