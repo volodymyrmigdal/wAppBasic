@@ -1,10 +1,13 @@
 # Test against the latest version of this Node.js version
-os: Visual Studio 2019
+# os: Visual Studio 2019
 
-init:
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+build_cloud: docker
+docker_image: appveyor/build-image:minimal-windowsservercore-ltsc2019
 
-platform: x64
+# init:
+#   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+# platform: x64
 
 environment:
   nodejs_version: "12"
