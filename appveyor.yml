@@ -1,22 +1,17 @@
 # Test against the latest version of this Node.js version
-image: 
-  - macos-mojave
-  - Ubuntu
-  - Visual Studio 2017
-  
+os: Visual Studio 2019
+
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+platform: x64
 
 environment:
-  matrix:
-    - nodejs_version: "12"
-    - nodejs_version: "10"
-    - nodejs_version: "9"
-    - nodejs_version: "8"
+  nodejs_version: "12"
 
 # Install scripts. (runs after repo cloning)
 install:
-  # Get the latest stable version of Node.js or io.js
-  - sh: nvm install $nodejs_version
-  # install modules
+  - ps: Install-Product node $env:nodejs_version
   - npm install
 
 # Post-install test scripts.
@@ -24,7 +19,6 @@ test_script:
   # Output useful info for debugging.
   - node --version
   - npm --version
-  - npm test
 
 # Don't actually build.
 build: off
