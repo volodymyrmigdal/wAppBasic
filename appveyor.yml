@@ -19,7 +19,7 @@ test_script:
   # Output useful info for debugging.
   - node --version
   - npm --version
-  - "node sample/interruptSignalChild/Windows-kill.js"
+  - docker build -t appbasic .
 
 # Don't actually build.
 build: off
