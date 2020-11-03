@@ -32463,7 +32463,7 @@ function experimentIpcDeasync( test )
   let context = this;
   let a = context.assetFor( test, false );
 
-  for( let i = 0 ; i < 10; i++ )
+  for( let i = 0 ; i < 50; i++ )
   a.ready.then( run )
 
   return a.ready;
