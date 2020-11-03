@@ -29,6 +29,7 @@ function suiteBegin()
   context.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'Io' );
   context.assetsOriginalPath = _.path.join( __dirname, '_asset' );
   context.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
+  console.log( 'suiteBegin:', context.suiteTempPath );
 }
 
 //
@@ -36,6 +37,7 @@ function suiteBegin()
 function suiteEnd()
 {
   let context = this;
+  console.log( 'suiteEnd:', context.suiteTempPath );
   _.assert( _.strHas( context.suiteTempPath, '/Io' ) )
   _.path.tempClose( context.suiteTempPath );
 }

@@ -26,9 +26,11 @@ let Self = {};
 function suiteBegin()
 {
   let context = this;
+  console.log( _.path.dirTemp() )
   context.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'Io' );
   context.assetsOriginalPath = _.path.join( __dirname, '_asset' );
   context.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
+  console.log( 'suiteBegin:', context.suiteTempPath );
 }
 
 //
@@ -36,6 +38,7 @@ function suiteBegin()
 function suiteEnd()
 {
   let context = this;
+  console.log( 'suiteEnd:', context.suiteTempPath );
   _.assert( _.strHas( context.suiteTempPath, '/Io' ), `context.suiteTempPath : ${context.suiteTempPath}` );
   _.path.tempClose( context.suiteTempPath );
 }
