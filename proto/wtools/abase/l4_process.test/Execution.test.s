@@ -32653,7 +32653,6 @@ var Proto =
   routineTimeOut : 60000,
   onSuiteBegin : suiteBegin,
   onSuiteEnd : suiteEnd,
-  enabled : 0,
 
   context :
   {
