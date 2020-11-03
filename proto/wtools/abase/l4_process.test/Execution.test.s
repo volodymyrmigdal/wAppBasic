@@ -32499,6 +32499,7 @@ function experimentIpcDeasync( test )
   }
 }
 
+experimentIpcDeasync.timeOut = 1200000;
 experimentIpcDeasync.experimental = 1;
 experimentIpcDeasync.description =
 `
