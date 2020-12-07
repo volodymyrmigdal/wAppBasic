@@ -1313,8 +1313,8 @@ function startSingle_body( o )
 
   let result = _.process.startMinimal.body.call( _.process, o );
 
-  if( o.when === 'afterdeath' )
-  runAfterDeath();
+  // if( o.when === 'afterdeath' )
+  // runAfterDeath();
 
   return result;
 
@@ -1431,7 +1431,7 @@ function startSingle_body( o )
     o.mode = 'fork';
     o.ipc = true;
     o.args = [];
-    o.detaching = true;
+    o.detaching = 2;
     o.stdio = _.dup( 'ignore', 3 );
     o.stdio.push( 'ipc' );
     o.inputMirroring = 0;
