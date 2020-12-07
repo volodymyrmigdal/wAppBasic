@@ -13801,8 +13801,6 @@ function startMinimalDetachingWaitForDisconnect( test )
       
       childReady.then( () => 
       {
-        stack.push( 'secondaryReady' );
-        
         test.will = 'secondary process is alive'
         test.true( _.process.isAlive( childPid ) );
         return _.process.terminate({ pid : o.pnd.pid, withChildren : 0 })
