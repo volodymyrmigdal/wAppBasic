@@ -1431,7 +1431,7 @@ function startSingle_body( o )
     o.mode = 'fork';
     o.ipc = true;
     o.args = [];
-    o.detaching = 1;
+    o.detaching = true;
     o.stdio = _.dup( 'ignore', 3 );
     o.stdio.push( 'ipc' );
     o.inputMirroring = 0;
