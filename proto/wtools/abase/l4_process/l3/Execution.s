@@ -917,11 +917,11 @@ function startMinimal_body( o )
     if( this.pnd.stderr )
     this.pnd.stderr.destroy();
 
+    this.pnd.unref();
+    
     if( this.pnd.disconnect )
     if( this.pnd.connected )
     this.pnd.disconnect();
-
-    this.pnd.unref();
 
     if( !this.ended )
     {
@@ -1494,14 +1494,16 @@ function startSingle_body( o )
 
   function runAfterDeath()
   {
-    o.conStart.give( function( err, op )
+    o.conStart.finally( function( err, op )
     {
       if( err )
       return this.error( err );
       
       o.disconnect();
       
-      o.pnd.on( 'disconnect', () => this.take( op ) );
+      let disconnected = _.Consequence();
+      
+      o.pnd.on( 'disconnect', () => disconnected.take( op ) );
 
       // let ipc = require( 'node-ipc' );
 
@@ -1522,7 +1524,8 @@ function startSingle_body( o )
       //      });
       //   })
       // })
-
+      
+      return disconnected;
     })
   }
 
