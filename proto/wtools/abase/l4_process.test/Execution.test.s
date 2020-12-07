@@ -10893,7 +10893,7 @@ function startSingleAfterDeathTerminatingMain( test )
 
     _.process.startSingle( o );
 
-    o.conDisconnect.thenGive( () =>
+    o.conStart.thenGive( () =>
     {
       process.send( o.pnd.pid );
     })
