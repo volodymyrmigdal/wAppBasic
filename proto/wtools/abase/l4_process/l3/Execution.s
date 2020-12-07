@@ -1314,8 +1314,8 @@ function startSingle_body( o )
 
   let result = _.process.startMinimal.body.call( _.process, o );
 
-  // if( o.when === 'afterdeath' )
-  // runAfterDeath();
+  if( o.when === 'afterdeath' )
+  runAfterDeath();
 
   return result;
 
@@ -1432,7 +1432,7 @@ function startSingle_body( o )
     o.mode = 'fork';
     o.ipc = true;
     o.args = [];
-    o.detaching = 2;
+    o.detaching = 1;
     o.stdio = _.dup( 'ignore', 3 );
     o.stdio.push( 'ipc' );
     o.inputMirroring = 0;
@@ -1464,6 +1464,8 @@ function startSingle_body( o )
 
       return _.process.startMultiple( o );
     })
+    
+    process.send( 'ready' );
 
     /* */
 
@@ -1508,8 +1510,13 @@ function startSingle_body( o )
     o.conStart.then( ( op ) =>
     {
       let disconnected = _.Consequence();
-      o.pnd.on( 'disconnect', () => disconnected.take( op ) );
-      o.disconnect();
+
+      o.pnd.on( 'message', () => 
+      {
+        o.pnd.on( 'disconnect', () => disconnected.take( op ) );
+        o.disconnect();
+      })
+      
       return disconnected;
       
       // let ipc = require( 'node-ipc' );
