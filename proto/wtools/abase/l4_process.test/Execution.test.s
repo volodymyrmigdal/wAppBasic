@@ -13746,7 +13746,7 @@ function startMinimalDetachingWaitForDisconnect( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testFilePath = a.abs( a.routinePath, 'testFile' );
-  let modes = [ 'fork' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) =>
   {
@@ -13788,14 +13788,24 @@ function startMinimalDetachingWaitForDisconnect( test )
         throwingExitCode : 0,
         ipc : 1,
       }
-      let con = _.process.startMinimal( o );
+      let con = _.process.startSingle( o );
 
       let childPid;
+      let childReady = _.Consequence();
 
-      o.pnd.on( 'message', ( data ) =>
+      o.pnd.on( 'message', ( e ) =>
       {
-        childPid = _.numberFrom( data );
-        _.process.terminate({ pid : o.pnd.pid, withChildren : 0 })
+        childPid = _.numberFrom( e );
+        childReady.take( childPid );
+      })
+      
+      childReady.then( () => 
+      {
+        stack.push( 'secondaryReady' );
+        
+        test.will = 'secondary process is alive'
+        test.true( _.process.isAlive( childPid ) );
+        return _.process.terminate({ pid : o.pnd.pid, withChildren : 0 })
       })
 
       con.then( ( op ) =>
@@ -13829,18 +13839,14 @@ function startMinimalDetachingWaitForDisconnect( test )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
-    let args = _.process.input();
-
     let o =
     {
-      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
-      mode,
+      execPath : 'node testAppChild.js',
+      mode : 'spawn',
       detaching : 2,
     }
 
-    _.mapExtend( o, args.map );
-
-    _.process.startMinimal( o );
+    _.process.startSingle( o );
     
     o.conStart.thenGive( () => 
     {
@@ -13850,6 +13856,7 @@ function startMinimalDetachingWaitForDisconnect( test )
     _.time.out( context.t2 * 2, () => 
     {
       console.log( 'parent::end' );
+      return null;
     })
 
   }
