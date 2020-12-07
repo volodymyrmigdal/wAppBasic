@@ -10895,7 +10895,7 @@ function startSingleAfterDeathTerminatingMain( test )
 
     o.conDisconnect.thenGive( () =>
     {
-      process.send( o.pnd.pid );
+      _.time.out( context.t1 * 3, () => process.send( o.pnd.pid ) );
     })
 
     _.time.out( context.t2 * 2, () => /* 10000 */
