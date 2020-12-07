@@ -574,7 +574,17 @@ function startMinimal_body( o )
     /* state */
 
     o.state = 'started';
-    o.conStart.take( o );
+    
+    if( o.detaching === 2 )
+    {
+      o.disconnect();
+      o.pnd.on( 'disconnect', () =>  o.conStart.take( o ) )
+    }
+    else
+    {
+      o.conStart.take( o );
+    }
+    
   }
 
   /* */
