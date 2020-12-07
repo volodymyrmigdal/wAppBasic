@@ -10783,8 +10783,8 @@ function startSingleAfterDeathTerminatingMain( test )
         
         test.will = 'secondary process is alive'
         test.true( _.process.isAlive( secondaryPid ) );
-
-        return _.process.waitForDeath({ pid : secondaryPid, timeOut : context.t1*15 });
+        
+        return _.time.out( context.t2 * 3 ); /* 15000 */
       })
 
       o.conTerminate.then( () =>
