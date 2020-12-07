@@ -1417,15 +1417,17 @@ function startSingle_body( o )
     let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
     let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
 
-    o.execPath = `node "${_.path.nativize( secondaryFilePath )}"`;
-    o.mode = 'spawn';
-    o.ipc = false;
+    o.execPath = _.path.nativize( secondaryFilePath );
+    o.mode = 'fork';
+    o.ipc = true;
     o.args = [];
     o.detaching = true;
     o.stdio = _.dup( 'ignore', 3 );
+    o.stdio.push( 'ipc' );
     o.inputMirroring = 0;
     o.outputPiping = 0;
     o.outputCollecting = 0;
+
   }
 
   /* */
@@ -1496,8 +1498,10 @@ function startSingle_body( o )
     {
       if( err )
       return this.error( err );
-
+      
       o.disconnect();
+      
+      o.pnd.on( 'disconnect', () => this.take( op ) );
 
       // let ipc = require( 'node-ipc' );
 
@@ -1519,7 +1523,6 @@ function startSingle_body( o )
       //   })
       // })
 
-      this.take( op );
     })
   }
 
