@@ -13839,9 +13839,11 @@ function startMinimalDetachingWaitForDisconnect( test )
 
     let o =
     {
-      execPath : 'node testAppChild.js',
-      mode : 'spawn',
-      detaching : 2,
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      ipc : 1,
+      detaching : 1,
+      stdio : 'ignore'
     }
 
     _.process.startSingle( o );
