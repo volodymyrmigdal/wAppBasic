@@ -1494,17 +1494,13 @@ function startSingle_body( o )
 
   function runAfterDeath()
   {
-    o.conStart.finally( function( err, op )
+    o.conStart.then( ( op ) =>
     {
-      if( err )
-      return this.error( err );
-      
-      o.disconnect();
-      
       let disconnected = _.Consequence();
-      
       o.pnd.on( 'disconnect', () => disconnected.take( op ) );
-
+      o.disconnect();
+      return disconnected;
+      
       // let ipc = require( 'node-ipc' );
 
       // o.pnd.on( 'message', ( ipcHostId ) =>
@@ -1524,8 +1520,6 @@ function startSingle_body( o )
       //      });
       //   })
       // })
-      
-      return disconnected;
     })
   }
 
