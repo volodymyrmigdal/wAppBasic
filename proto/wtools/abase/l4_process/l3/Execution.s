@@ -1417,16 +1417,15 @@ function startSingle_body( o )
     let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
     let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
 
-    o.execPath = _.path.nativize( secondaryFilePath );
-    o.mode = 'fork';
-    o.ipc = true;
+    o.execPath = `node "${_.path.nativize( secondaryFilePath )}"`;
+    o.mode = 'spawn';
+    o.ipc = false;
     o.args = [];
     o.detaching = true;
-    o.stdio = _.dup( 'pipe', 3 );
-    o.stdio.push( 'ipc' );
+    o.stdio = _.dup( 'ignore', 3 );
     o.inputMirroring = 0;
-    o.outputPiping = 1;
-
+    o.outputPiping = 0;
+    o.outputCollecting = 0;
   }
 
   /* */
