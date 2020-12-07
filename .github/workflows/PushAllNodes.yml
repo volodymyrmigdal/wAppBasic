@@ -26,6 +26,7 @@ jobs :
       matrix :
         os : [ ubuntu-latest, windows-latest, macos-latest ]
         node-version : [ 10.x, 12.x, 13.x, 14.x, 15.x ]
+        routine : [ startSingleAfterDeathTerminatingMain ]
     steps :
     - run : git config --global core.autocrlf input
     - run : git config --global user.email "testing@testing.com"
@@ -38,7 +39,8 @@ jobs :
       with :
         node-version : ${{ matrix.node-version }}
     - run : npm i
-    - name : test routine
-      run : node proto/wtools/abase/l4_process.test/Execution.test.s r:startSingleAfterDeathTerminatingMain v:10
-      env :
-        WTOOLS_BOT_TOKEN : ${{ secrets.WTOOLS_BOT_TOKEN }}
+    - run : node proto/wtools/abase/l4_process.test/Execution.test.s r:${{ matrix.routine }} v:10
+    - run : node proto/wtools/abase/l4_process.test/Execution.test.s r:${{ matrix.routine }} v:10
+    - run : node proto/wtools/abase/l4_process.test/Execution.test.s r:${{ matrix.routine }} v:10
+    - run : node proto/wtools/abase/l4_process.test/Execution.test.s r:${{ matrix.routine }} v:10
+    - run : node proto/wtools/abase/l4_process.test/Execution.test.s r:${{ matrix.routine }} v:10
