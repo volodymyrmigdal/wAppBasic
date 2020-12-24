@@ -38257,45 +38257,55 @@ function childrenWindows( test )
 {
   let context = this;
 
-  let op =
+  for( let i = 0; i < 10; i++ )
+  a.ready.then( () => run() );
+
+  return a.ready;
+
+  function run()
   {
-    depth : 3,
-    breadth : 1,
-    executionTime : 15000
-  }
-
-  return _.process._startTree( op )
-  .then( ( op ) =>
-  {
-    let rootOp = op.rootOp;
-    let rootPnd = op.rootOp.pnd;
-    let rootPid = rootPnd.pid;
-    let ready = rootOp.conTerminate
-    let cons = [];
-
-    console.log( _.toJs( op.list ) )
-
-    let timer = _.time.periodic( 1000, () =>
+    let op =
     {
-      let con = _.process.children({ pid : rootPid, format : 'list' });
+      depth : 3,
+      breadth : 1,
+      executionTime : 15000
+    }
 
-      con.then( ( children ) =>
+    return _.process._startTree( op )
+    .then( ( op ) =>
+    {
+      let rootOp = op.rootOp;
+      let rootPnd = op.rootOp.pnd;
+      let rootPid = rootPnd.pid;
+      let ready = rootOp.conTerminate
+      let cons = [];
+
+      console.log( _.toJs( op.list ) )
+
+      let timer = _.time.periodic( 1000, () =>
       {
-        let actualPids = op.list.map( ( pnd ) => pnd.pid );
-        let actualPpids = op.list.map( ( pnd ) => pnd.ppid );
+        if( !_.process.isAlive( rootPid ) )
+        return false;
 
-        let pids = children.map( ( child ) => child.pid );
-        let ppids = children.map( ( child ) => child.ppid );
-        let names = children.filter( ( child ) => child.name !== 'node.exe' );
+        let con = _.process.children({ pid : rootPid, format : 'list' });
 
-        // console.log( _.toJs( op.list ) )
+        con.then( ( children ) =>
+        {
+          let actualPids = op.list.map( ( pnd ) => pnd.pid );
+          let actualPpids = op.list.map( ( pnd ) => pnd.ppid );
 
-        // if( names.length )
-        // console.log( _.toJs( names ) );
+          let pids = children.map( ( child ) => child.pid );
+          let ppids = children.map( ( child ) => child.ppid );
+          let names = children.filter( ( child ) => child.name !== 'node.exe' );
 
-        test.identical( names.length, 0 );
+          // console.log( _.toJs( op.list ) )
 
-        pids.forEach( ( pid ) =>
+          // if( names.length )
+          // console.log( _.toJs( names ) );
+
+          test.identical( names.length, 0 );
+
+          pids.forEach( ( pid ) =>
         {
           test.true( _.longHas( actualPids, pid ) );
         })
@@ -38326,9 +38336,10 @@ function childrenWindows( test )
 
     return ready;
   })
+  }
 }
 
-childrenWindows.routineTimeOut = 120000;
+childrenWindows.routineTimeOut = 300000;
 
 // --
 // experiment
