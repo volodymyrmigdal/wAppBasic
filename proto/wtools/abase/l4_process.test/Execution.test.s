@@ -38339,6 +38339,68 @@ function childrenWindows( test )
 
 childrenWindows.routineTimeOut = 600000;
 
+async function childrenWindows( test )
+{
+  let context = this;
+  let cons = [];
+  let wait = _.Consequence();
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( program );
+
+  let ops = [];
+
+  for( let i = 0; i < 10; i++ )
+  {
+    let op =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      detaching : 2
+    }
+    _.process.startSingle( op )
+
+    ops.push( op );
+  }
+
+  await _.time.out( 3000 );
+
+  let timer = _.time.periodic( 100, () =>
+  {
+    let con = _.process.children({ pid : process.pid, format : 'list' });
+
+    con.then( ( children ) =>
+    {
+      console.log( children)
+      let names = children.filter( ( child ) => !_.strBegins( child.name, 'node' ) );
+
+      if( names.length )
+      console.log( _.toJs( names ) );
+
+      test.identical( names.length, 0 );
+
+      return null;
+    })
+
+    cons.push( con );
+
+    return true;
+  })
+
+
+  await _.time.out( 15000 );
+
+  timer.cancel();
+
+  return _.Consequence.AndKeep( ... cons );
+
+  function program()
+  {
+    setTimeout( () => {}, 15000 )
+  }
+}
+
+childrenWindows.routineTimeOut = 600000;
+
 // --
 // experiment
 // --
