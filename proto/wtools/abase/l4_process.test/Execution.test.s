@@ -38287,7 +38287,7 @@ function childrenWindows( test )
 
       console.log( _.toJs( op.list ) )
 
-      let timer = _.time.periodic( 50, () =>
+      let timer = _.time.periodic( 100, () =>
       {
         if( !_.process.isAlive( rootPid ) )
         return false;
