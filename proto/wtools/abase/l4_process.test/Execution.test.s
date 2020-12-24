@@ -38273,6 +38273,8 @@ function childrenWindows( test )
     let ready = rootOp.conTerminate
     let cons = [];
 
+    console.log( _.toJs( op.list ) )
+
     let timer = _.time.periodic( 1000, () =>
     {
       let con = _.process.children({ pid : rootPid, format : 'list' });
@@ -38286,10 +38288,10 @@ function childrenWindows( test )
         let ppids = children.map( ( child ) => child.ppid );
         let names = children.filter( ( child ) => child.name !== 'node.exe' );
 
-        console.log( _.toJs( op.list ) )
+        // console.log( _.toJs( op.list ) )
 
-        if( names.length )
-        console.log( _.toJs( names ) );
+        // if( names.length )
+        // console.log( _.toJs( names ) );
 
         test.identical( names.length, 0 );
 
@@ -38300,7 +38302,7 @@ function childrenWindows( test )
 
         ppids.forEach( ( ppid ) =>
         {
-          test.true( _.longHas( actualPpids, ppid ) );
+          test.true( _.longHas( actualPpids, ppid ) || ppid === process.pid );
         })
 
         return null;
