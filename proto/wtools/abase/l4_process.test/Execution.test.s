@@ -38257,17 +38257,19 @@ function childrenWindows( test )
 {
   let context = this;
 
-  for( let i = 0; i < 10; i++ )
-  a.ready.then( () => run() );
+  let ready = _.Consequence().take( null );
 
-  return a.ready;
+  for( let i = 0; i < 10; i++ )
+  ready.then( () => run() );
+
+  return ready;
 
   function run()
   {
     let op =
     {
       depth : 3,
-      breadth : 1,
+      breadth : 10,
       executionTime : 15000
     }
 
@@ -38339,7 +38341,7 @@ function childrenWindows( test )
   }
 }
 
-childrenWindows.routineTimeOut = 300000;
+childrenWindows.routineTimeOut = 600000;
 
 // --
 // experiment
