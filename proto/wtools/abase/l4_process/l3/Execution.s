@@ -3323,20 +3323,37 @@ function _startTree( o )
   _.process.startSingle( op );
 
   o.total = calculateNumberOfProcesses();
+  o.terminationBegun = _.Consequence();
+  let terminationBegun = false;
 
   let ready = _.Consequence();
 
   op.pnd.on( 'message', ( d ) =>
   {
-    if( d.isLast )
-    o.list.push( d.pnd );
+
+    if( d.pnd )
+    {
+      if( d.isLast )
+      o.list.push( d.pnd );
+      else
+      o.list.unshift( d.pnd );
+
+      _.assert( o.list.length <= o.total );
+
+      if( o.list.length === o.total )
+      ready.take( o );
+
+    }
+    else if( d.end )
+    {
+      if( !terminationBegun )
+      {
+        terminationBegun = true;
+        o.terminationBegun.take( null )
+      }
+    }
     else
-    o.list.unshift( d.pnd );
-
-    _.assert( o.list.length <= o.total );
-
-    if( o.list.length === o.total )
-    ready.take( o );
+    _.assert( 0, 'unexpected' );
   })
 
   return ready;
@@ -3362,6 +3379,7 @@ function _startTree( o )
       process.send( descriptor );
       return setTimeout( () =>
       {
+        process.send({ end : 1, pid : process.pid })
       }, executionTime );
     }
 
@@ -3385,6 +3403,7 @@ function _startTree( o )
       {
         process.send( d );
 
+        if( d.pnd )
         if( d.pnd.ppid === process.pid )
         con.take( null )
       })

@@ -38259,7 +38259,7 @@ function childrenWindows( test )
 
   let ready = _.Consequence().take( null );
 
-  for( let i = 0; i < 10; i++ )
+  // for( let i = 0; i < 10; i++ )
   ready.then( () => run() );
 
   return ready;
@@ -38269,12 +38269,14 @@ function childrenWindows( test )
     let op =
     {
       depth : 3,
-      breadth : 10,
+      breadth : 3,
       executionTime : 15000
     }
 
-    return _.process._startTree( op )
-    .then( ( op ) =>
+    _.process._startTree( op );
+
+    return op.terminationBegun
+    .then( () =>
     {
       let rootOp = op.rootOp;
       let rootPnd = op.rootOp.pnd;
@@ -38282,9 +38284,12 @@ function childrenWindows( test )
       let ready = rootOp.conTerminate
       let cons = [];
 
+      let actualPids = op.list.map( ( pnd ) => pnd.pid );
+      let actualPpids = op.list.map( ( pnd ) => pnd.ppid );
+
       console.log( _.toJs( op.list ) )
 
-      let timer = _.time.periodic( 1000, () =>
+      let timer = _.time.periodic( 100, () =>
       {
         if( !_.process.isAlive( rootPid ) )
         return false;
@@ -38293,51 +38298,46 @@ function childrenWindows( test )
 
         con.then( ( children ) =>
         {
-          let actualPids = op.list.map( ( pnd ) => pnd.pid );
-          let actualPpids = op.list.map( ( pnd ) => pnd.ppid );
-
           let pids = children.map( ( child ) => child.pid );
           let ppids = children.map( ( child ) => child.ppid );
           let names = children.filter( ( child ) => child.name !== 'node.exe' );
 
-          // console.log( _.toJs( op.list ) )
-
-          // if( names.length )
-          // console.log( _.toJs( names ) );
+          if( names.length )
+          console.log( _.toJs( names ) );
 
           test.identical( names.length, 0 );
 
           pids.forEach( ( pid ) =>
-        {
-          test.true( _.longHas( actualPids, pid ) );
+          {
+            test.true( _.longHas( actualPids, pid ) );
+          })
+
+          ppids.forEach( ( ppid ) =>
+          {
+            test.true( _.longHas( actualPpids, ppid ) || ppid === process.pid );
+          })
+
+          return null;
         })
 
-        ppids.forEach( ( ppid ) =>
-        {
-          test.true( _.longHas( actualPpids, ppid ) || ppid === process.pid );
-        })
+        cons.push( con );
 
-        return null;
+        return true;
       })
 
-      cons.push( con );
+      ready.then( () =>
+      {
+        timer.cancel();
+        return _.time.out( 2000 );
+      });
 
-      return true;
+      ready.then( () =>
+      {
+        return _.Consequence.AndKeep( ... cons );
+      })
+
+      return ready;
     })
-
-    ready.then( () =>
-    {
-      timer.cancel();
-      return _.time.out( 2000 );
-    });
-
-    ready.then( () =>
-    {
-      return _.Consequence.AndKeep( ... cons );
-    })
-
-    return ready;
-  })
   }
 }
 
