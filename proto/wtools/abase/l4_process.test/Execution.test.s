@@ -38269,13 +38269,11 @@ function childrenWindows( test )
     let op =
     {
       depth : 3,
-      breadth : 3,
+      breadth : 10,
       executionTime : 15000
     }
 
-    _.process._startTree( op );
-
-    return op.terminationBegun
+    return _.process._startTree( op )
     .then( () =>
     {
       let rootOp = op.rootOp;
@@ -38328,12 +38326,6 @@ function childrenWindows( test )
 
         return true;
       })
-
-      ready.then( () =>
-      {
-        timer.cancel();
-        return _.time.out( 2000 );
-      });
 
       ready.then( () =>
       {
