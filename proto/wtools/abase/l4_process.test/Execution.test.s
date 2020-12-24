@@ -38289,7 +38289,7 @@ function childrenWindows( test )
 
       console.log( _.toJs( op.list ) )
 
-      let timer = _.time.periodic( 100, () =>
+      let timer = _.time.periodic( 50, () =>
       {
         if( !_.process.isAlive( rootPid ) )
         return false;
@@ -38300,22 +38300,26 @@ function childrenWindows( test )
         {
           let pids = children.map( ( child ) => child.pid );
           let ppids = children.map( ( child ) => child.ppid );
-          let names = children.filter( ( child ) => child.name !== 'node.exe' );
+          let names = children.filter( ( child ) => !_.strBegins( child.name, 'node' ) );
 
           if( names.length )
           console.log( _.toJs( names ) );
 
           test.identical( names.length, 0 );
 
-          pids.forEach( ( pid ) =>
-          {
-            test.true( _.longHas( actualPids, pid ) );
-          })
+          let missing = pids.filter( ( pid ) => !_.longHas( actualPids, pid ) );
 
-          ppids.forEach( ( ppid ) =>
-          {
-            test.true( _.longHas( actualPpids, ppid ) || ppid === process.pid );
-          })
+          if( missing.length )
+          console.log( _.toJs( missing ) );
+
+          test.identical( missing.length, 0 );
+
+          let missingPpids = ppids.filter( ( ppid ) => !_.longHas( actualPpids, ppid ) && ppid !== process.pid );
+
+          if( missingPpids.length )
+          console.log( _.toJs( missingPpids ) );
+
+          test.identical( missingPpids.length, 0 );
 
           return null;
         })
