@@ -38251,6 +38251,83 @@ function _startTree( test )
 
 _startTree.routineTimeOut = 120000;
 
+//
+
+function childrenWindows( test )
+{
+  let context = this;
+
+  let op =
+  {
+    depth : 3,
+    breadth : 1,
+    executionTime : 15000
+  }
+
+  return _.process._startTree( op )
+  .then( ( op ) =>
+  {
+    let rootOp = op.rootOp;
+    let rootPnd = op.rootOp.pnd;
+    let rootPid = rootPnd.pid;
+    let ready = rootOp.conTerminate
+    let cons = [];
+
+    let timer = _.time.periodic( 1000, () =>
+    {
+      let con = _.process.children({ pid : rootPid, format : 'list' });
+
+      con.then( ( children ) =>
+      {
+        let actualPids = op.list.map( ( pnd ) => pnd.pid );
+        let actualPpids = op.list.map( ( pnd ) => pnd.ppid );
+
+        let pids = children.map( ( child ) => child.pid );
+        let ppids = children.map( ( child ) => child.ppid );
+        let names = children.filter( ( child ) => child.name !== 'node.exe' );
+
+        console.log( _.toJs( op.list ) )
+
+        if( names.length )
+        console.log( _.toJs( names ) );
+
+        test.identical( names.length, 0 );
+
+        pids.forEach( ( pid ) =>
+        {
+          test.true( _.longHas( actualPids, pid ) );
+        })
+
+        ppids.forEach( ( ppid ) =>
+        {
+          test.true( _.longHas( actualPpids, ppid ) );
+        })
+
+        return null;
+      })
+
+      cons.push( con );
+
+      return true;
+    })
+
+    ready.then( () =>
+    {
+      timer.cancel();
+      return _.time.out( 2000 );
+    });
+
+    ready.then( () =>
+    {
+      return _.Consequence.AndKeep( ... cons );
+    })
+
+    return ready;
+  })
+}
+
+childrenWindows.routineTimeOut = 120000;
+
 // --
 // experiment
 // --
@@ -38774,6 +38851,8 @@ var Proto =
     spawnTimeOf,
 
     _startTree,
+
+    childrenWindows,
 
     // experiments
 
