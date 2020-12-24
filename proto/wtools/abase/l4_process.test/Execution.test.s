@@ -38273,19 +38273,21 @@ function childrenWindows( test )
       executionTime : 15000
     }
 
-    return _.process._startTree( op )
+    _.process._startTree( op );
+
+    return op.rootOp.conStart
     .then( () =>
     {
       let rootOp = op.rootOp;
       let rootPnd = op.rootOp.pnd;
       let rootPid = rootPnd.pid;
-      let ready = rootOp.conTerminate
+      let ready = _.time.out( 30000 )
       let cons = [];
 
-      let actualPids = op.list.map( ( pnd ) => pnd.pid );
-      let actualPpids = op.list.map( ( pnd ) => pnd.ppid );
+      // let actualPids = op.list.map( ( pnd ) => pnd.pid );
+      // let actualPpids = op.list.map( ( pnd ) => pnd.ppid );
 
-      console.log( _.toJs( op.list ) )
+      // console.log( _.toJs( op.list ) )
 
       let timer = _.time.periodic( 100, () =>
       {
@@ -38296,28 +38298,28 @@ function childrenWindows( test )
 
         con.then( ( children ) =>
         {
-          let pids = children.map( ( child ) => child.pid );
-          let ppids = children.map( ( child ) => child.ppid );
+          // let pids = children.map( ( child ) => child.pid );
+          // let ppids = children.map( ( child ) => child.ppid );
           let names = children.filter( ( child ) => !_.strBegins( child.name, 'node' ) );
 
           if( names.length )
-          console.log( _.toJs( names ) );
+          console.log( _.toJs( children ) );
 
           test.identical( names.length, 0 );
 
-          let missing = pids.filter( ( pid ) => !_.longHas( actualPids, pid ) );
+          // let missing = pids.filter( ( pid ) => !_.longHas( actualPids, pid ) );
 
-          if( missing.length )
-          console.log( _.toJs( missing ) );
+          // if( missing.length )
+          // console.log( _.toJs( missing ) );
 
-          test.identical( missing.length, 0 );
+          // test.identical( missing.length, 0 );
 
-          let missingPpids = ppids.filter( ( ppid ) => !_.longHas( actualPpids, ppid ) && ppid !== process.pid );
+          // let missingPpids = ppids.filter( ( ppid ) => !_.longHas( actualPpids, ppid ) && ppid !== process.pid );
 
-          if( missingPpids.length )
-          console.log( _.toJs( missingPpids ) );
+          // if( missingPpids.length )
+          // console.log( _.toJs( missingPpids ) );
 
-          test.identical( missingPpids.length, 0 );
+          // test.identical( missingPpids.length, 0 );
 
           return null;
         })
@@ -38329,6 +38331,7 @@ function childrenWindows( test )
 
       ready.then( () =>
       {
+        timer.cancel();
         return _.Consequence.AndKeep( ... cons );
       })
 
@@ -38348,13 +38351,15 @@ async function childrenWindows( test )
   let testAppPath = a.program( program );
 
   let ops = [];
+  let n = 5;
 
-  for( let i = 0; i < 10; i++ )
+  for( let i = 0; i < n; i++ )
   {
     let op =
     {
       execPath : 'node ' + testAppPath,
       mode : 'spawn',
+      args : [ n ],
       detaching : 2
     }
     _.process.startSingle( op )
@@ -38364,13 +38369,13 @@ async function childrenWindows( test )
 
   await _.time.out( 3000 );
 
-  let timer = _.time.periodic( 100, () =>
+  let timer = _.time.periodic( 10, () =>
   {
     let con = _.process.children({ pid : process.pid, format : 'list' });
 
     con.then( ( children ) =>
     {
-      console.log( children)
+      console.log( _.toJs( children ) )
       let names = children.filter( ( child ) => !_.strBegins( child.name, 'node' ) );
 
       if( names.length )
@@ -38386,7 +38391,6 @@ async function childrenWindows( test )
     return true;
   })
 
-
   await _.time.out( 15000 );
 
   timer.cancel();
@@ -38395,7 +38399,24 @@ async function childrenWindows( test )
 
   function program()
   {
-    setTimeout( () => {}, 15000 )
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let n = _.numberFrom( process.argv[ 2 ])
+
+    for( let i = 0; i < n; i++ )
+    {
+      _.process.startSingle
+      ({
+        execPath : 'node ' + __filename,
+        mode : 'spawn',
+        args : [ n - 1 ],
+        detaching : 2
+      })
+    }
+
+    setTimeout( () => {}, Math.random() * ( 15000 - 1000) + 1000 )
   }
 }
 
