@@ -38351,7 +38351,7 @@ async function childrenWindows( test )
   let testAppPath = a.program( program );
 
   let ops = [];
-  let n = 5;
+  let n = 550;
 
   for( let i = 0; i < n; i++ )
   {
@@ -38359,18 +38359,25 @@ async function childrenWindows( test )
     {
       execPath : 'node ' + testAppPath,
       mode : 'spawn',
-      args : [ n ],
-      detaching : 2
+      detaching : 2,
+      inputMirroring : 0
     }
     _.process.startSingle( op )
 
     ops.push( op );
   }
 
-  await _.time.out( 3000 );
+  let stop = false;
+  let ready = _.Consequence();
 
   let timer = _.time.periodic( 10, () =>
   {
+    if( stop )
+    {
+      ready.take( null );
+      return;
+    }
+
     let con = _.process.children({ pid : process.pid, format : 'list' });
 
     con.then( ( children ) =>
@@ -38383,6 +38390,9 @@ async function childrenWindows( test )
 
       test.identical( names.length, 0 );
 
+      if( children.length < 2 )
+      stop = true;
+
       return null;
     })
 
@@ -38391,32 +38401,16 @@ async function childrenWindows( test )
     return true;
   })
 
-  await _.time.out( 15000 );
+  ready.then( () =>
+  {
+    return _.Consequence.AndKeep( ... cons );
+  })
 
-  timer.cancel();
-
-  return _.Consequence.AndKeep( ... cons );
+  return ready;
 
   function program()
   {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    let n = _.numberFrom( process.argv[ 2 ])
-
-    for( let i = 0; i < n; i++ )
-    {
-      _.process.startSingle
-      ({
-        execPath : 'node ' + __filename,
-        mode : 'spawn',
-        args : [ n - 1 ],
-        detaching : 2
-      })
-    }
-
-    setTimeout( () => {}, Math.random() * ( 15000 - 1000) + 1000 )
+    setTimeout( () => {}, Math.random() * ( 2000 - 100) + 100 )
   }
 }
 
